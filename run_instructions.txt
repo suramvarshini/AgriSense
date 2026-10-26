@@ -1,0 +1,35 @@
+================================================================================
+AGRISENSE – PRECISION AGRICULTURE ANALYTICS PLATFORM
+NETLIFY DEPLOYMENT & RUN INSTRUCTIONS
+================================================================================
+
+A. Deploying to Netlify (3 Easy Methods)
+--------------------------------------------------------------------------------
+
+METHOD 1: Instant Drag & Drop (No CLI Required - Takes 10 Seconds)
+  1. Open your browser and go to: https://app.netlify.com/drop
+  2. Drag and drop the "frontend" folder from this project directory into the Netlify drop zone.
+  3. Netlify will deploy AgriSense instantly and give you a free live URL (e.g., https://agrisense.netlify.app)!
+
+METHOD 2: Netlify CLI Command
+  In your VS Code terminal, run:
+    npx netlify-cli deploy --prod --dir=frontend
+
+METHOD 3: Connect via GitHub
+  1. Push this project to GitHub.
+  2. In Netlify dashboard, click "Add new site" -> "Import an existing project".
+  3. Select your repository and set:
+       Publish directory: frontend
+       Build command: echo 'Building AgriSense'
+
+
+B. Running Locally in VS Code
+--------------------------------------------------------------------------------
+To run locally with Flask API server:
+  .\venv\Scripts\python.exe run.py
+
+This will:
+  1. Train Scikit-learn ML models & generate the 1,600-record dataset.
+  2. Start the Flask server on http://localhost:5000
+  3. Automatically open http://localhost:5000 in your web browser.
+================================================================================

@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSense – Precision Agriculture Analytics Platform</title>
+    <meta name="description" content="Precision Agriculture platform analyzing how soil and weather conditions influence crop yield and productivity.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet GIS Map CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf.js for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">AgriSense</span>
+                    <span class="brand-tag">Precision Analytics</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#satellite-map" class="nav-item" data-tab="satellite-map">
+                    <i class="fa-solid fa-satellite"></i>
+                    <span>Satellite Map</span>
+                </a>
+                <a href="#soil-health" class="nav-item" data-tab="soil-health">
+                    <i class="fa-solid fa-flask-vial"></i>
+                    <span>Soil Health</span>
+                </a>
+                <a href="#weather" class="nav-item" data-tab="weather">
+                    <i class="fa-solid fa-cloud-sun-rain"></i>
+                    <span>Weather Analytics</span>
+                </a>
+                <a href="#crop-prediction" class="nav-item" data-tab="crop-prediction">
+                    <i class="fa-solid fa-wheat-awn"></i>
+                    <span>Yield Prediction</span>
+                </a>
+                <a href="#crop-recommendation" class="nav-item" data-tab="crop-recommendation">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Crop Recommender</span>
+                </a>
+                <a href="#crop-health" class="nav-item" data-tab="crop-health">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Crop Health</span>
+                </a>
+                <a href="#agricultural-data" class="nav-item" data-tab="agricultural-data">
+                    <i class="fa-solid fa-table-list"></i>
+                    <span>Agriculture Data</span>
+                </a>
+                <a href="#farmer-recommendations" class="nav-item" data-tab="farmer-recommendations">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Smart Recommendations</span>
+                </a>
+                <a href="#reports" class="nav-item" data-tab="reports">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Reports & Export</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span class="pulse-dot"></span>
+                    <span id="api-status-text">Flask ML, GIS & CV Connected</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Wrapper -->
+        <main class="main-wrapper">
+            <!-- Header Bar -->
+            <header class="top-header">
+                <div class="header-titles">
+                    <h1 class="main-title">AgriSense</h1>
+                    <p class="sub-title">Precision Agriculture – Crop Yield & Soil Health Analytics Platform</p>
+                    <p class="description-text">Analyze soil and weather conditions to understand and improve crop productivity.</p>
+                </div>
+
+                <div class="header-controls">
+                    <!-- Location Selection Controls -->
+                    <div class="location-selectors">
+                        <div class="selector-group">
+                            <label><i class="fa-solid fa-map-location-dot"></i> State</label>
+                            <select id="state-select" class="form-select">
+                                <option value="All">All States</option>
+                                <option value="Telangana" selected>Telangana</option>
+                                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                <option value="Punjab">Punjab</option>
+                                <option value="Maharashtra">Maharashtra</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="Haryana">Haryana</option>
+                                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            </select>
+                        </div>
+
+                        <div class="selector-group">
+                            <label><i class="fa-solid fa-building-flag"></i> District</label>
+                            <select id="district-select" class="form-select">
+                                <option value="All">All Districts</option>
+                                <option value="Hanamkonda" selected>Hanamkonda</option>
+                                <option value="Warangal">Warangal</option>
+                                <option value="Hyderabad">Hyderabad</option>
+                                <option value="Karimnagar">Karimnagar</option>
+                                <option value="Nizamabad">Nizamabad</option>
+                                <option value="Khammam">Khammam</option>
+                                <option value="Nalgonda">Nalgonda</option>
+                                <option value="Adilabad">Adilabad</option>
+                                <option value="Bhadrachalam">Bhadrachalam</option>
+                            </select>
+                        </div>
+
+                        <div class="selector-group">
+                            <label><i class="fa-solid fa-tree-city"></i> Local Area / Village</label>
+                            <select id="village-select" class="form-select">
+                                <option value="All">All Villages</option>
+                            </select>
+                        </div>
+
+                        <div class="selector-group">
+                            <label><i class="fa-solid fa-plant-wilt"></i> Crop Filter</label>
+                            <select id="crop-select" class="form-select">
+                                <option value="All">All Crops</option>
+                                <option value="Rice" selected>Rice</option>
+                                <option value="Wheat">Wheat</option>
+                                <option value="Maize">Maize</option>
+                                <option value="Cotton">Cotton</option>
+                                <option value="Groundnut">Groundnut</option>
+                                <option value="Soybean">Soybean</option>
+                                <option value="Sugarcane">Sugarcane</option>
+                                <option value="Tomato">Tomato</option>
+                                <option value="Chilli">Chilli</option>
+                                <option value="Pulses">Pulses</option>
+                                <option value="Mustard">Mustard</option>
+                                <option value="Potato">Potato</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Tabs Container -->
+            <div class="content-body">
+
+                <!-- SECTION 1: DASHBOARD OVERVIEW -->
+                <section id="tab-dashboard" class="tab-pane active">
+                    <!-- Primary Question Banner -->
+                    <div class="question-banner">
+                        <div class="banner-icon">
+                            <i class="fa-solid fa-circle-question"></i>
+                        </div>
+                        <div class="banner-content">
+                            <h3>Core Agricultural Inquiry</h3>
+                            <p class="question-text">“How do soil and weather influence crop productivity?”</p>
+                            <p class="answer-text">
+                                Crop yield is driven by the interaction between soil fertility (pH, N-P-K, organic carbon) and climatic factors (rainfall, temperature, moisture). 
+                                Optimal moisture and balanced soil nutrients maximize yield potential, while extremes in temperature or rainfall lead to severe yield penalties.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Summary Cards Grid (7 Cards) -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="card-icon yield-icon"><i class="fa-solid fa-wheat-awn"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Average Crop Yield</span>
+                                <div class="card-value-container">
+                                    <span id="card-avg-yield" class="card-value">4.52</span>
+                                    <span class="card-unit">t/ha</span>
+                                </div>
+                                <span class="card-subtext"><i class="fa-solid fa-arrow-trend-up"></i> Based on regional sample records</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="card-icon soil-icon"><i class="fa-solid fa-flask-vial"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Soil Health Score</span>
+                                <div class="card-value-container">
+                                    <span id="card-soil-score" class="card-value">78.4</span>
+                                    <span class="card-unit">/ 100</span>
+                                </div>
+                                <span id="card-soil-status" class="card-badge badge-good">Good Condition</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="card-icon temp-icon"><i class="fa-solid fa-temperature-high"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Average Temperature</span>
+                                <div class="card-value-container">
+                                    <span id="card-avg-temp" class="card-value">27.3</span>
+                                    <span class="card-unit">°C</span>
+                                </div>
+                                <span class="card-subtext"><i class="fa-solid fa-sun"></i> Optimal growing range</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="card-icon rain-icon"><i class="fa-solid fa-cloud-showers-heavy"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Average Rainfall</span>
+                                <div class="card-value-container">
+                                    <span id="card-avg-rain" class="card-value">945</span>
+                                    <span class="card-unit">mm</span>
+                                </div>
+                                <span class="card-subtext"><i class="fa-solid fa-droplet"></i> Seasonal precipitation</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="card-icon moisture-icon"><i class="fa-solid fa-water"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Soil Moisture</span>
+                                <div class="card-value-container">
+                                    <span id="card-avg-moisture" class="card-value">48.2</span>
+                                    <span class="card-unit">%</span>
+                                </div>
+                                <span class="card-subtext"><i class="fa-solid fa-gauge-high"></i> Adequate root zone hydration</span>
+                            </div>
+                        </div>
+
+                        <div class="metric-card highlight-card">
+                            <div class="card-icon pred-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Predicted Yield</span>
+                                <div class="card-value-container">
+                                    <span id="card-pred-yield" class="card-value">4.85</span>
+                                    <span class="card-unit">t/ha</span>
+                                </div>
+                                <span class="card-subtext"><i class="fa-solid fa-microchip"></i> Random Forest ML Forecast</span>
+                            </div>
+                        </div>
+
+                        <!-- Crop Health Summary Card -->
+                        <div class="metric-card">
+                            <div class="card-icon health-icon"><i class="fa-solid fa-leaf"></i></div>
+                            <div class="card-info">
+                                <span class="card-label">Crop Health Diagnostic</span>
+                                <div class="card-value-container">
+                                    <span id="card-crop-health-status" class="card-value-sm">Upload Image</span>
+                                </div>
+                                <span id="card-crop-health-sub" class="card-subtext"><i class="fa-solid fa-camera"></i> Click Crop Health tab to analyze photo</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8 Analytics Charts Grid -->
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-chart-column"></i> Chart 1: Crop Yield by Crop Type</h4>
+                                <span class="chart-tag">Average Tonnes/Hectare</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-crop-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-cloud-sun-rain"></i> Chart 2: Rainfall vs Crop Yield</h4>
+                                <span class="chart-tag">Precipitation Influence</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-rainfall-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-temperature-half"></i> Chart 3: Temperature vs Crop Yield</h4>
+                                <span class="chart-tag">Thermal Stress Curve</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-temp-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-flask"></i> Chart 4: Soil pH vs Crop Yield</h4>
+                                <span class="chart-tag">Acidity / Alkalinity Impact</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-ph-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-vial-circle-check"></i> Chart 5: Nitrogen (N) vs Crop Yield</h4>
+                                <span class="chart-tag">Nutrient Response Curve</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-n-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-droplet"></i> Chart 6: Soil Moisture vs Crop Yield</h4>
+                                <span class="chart-tag">Hydration Index</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-moisture-yield"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-calendar-days"></i> Chart 7: Monthly Rainfall Trend</h4>
+                                <span class="chart-tag">Monsoon Seasonal Cycle</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-monthly-rainfall"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <h4><i class="fa-solid fa-chart-pie"></i> Chart 8: Soil Health Distribution</h4>
+                                <span class="chart-tag">Regional Quality Breakdown</span>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="chart-soil-distribution"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 1B: SATELLITE MAP (GIS) -->
+                <section id="tab-satellite-map" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-satellite"></i> Interactive Agricultural Satellite Map</h2>
+                        <p>Explore high-resolution GIS satellite imagery, select agricultural fields, track coordinates, and analyze soil/weather parameters.</p>
+                    </div>
+
+                    <!-- Map Search & Quick Jump Bar -->
+                    <div class="map-toolbar">
+                        <div class="map-search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="map-search-input" placeholder="Search location (e.g. Hanamkonda, Vijayawada, Nashik)...">
+                            <button id="btn-map-search" class="btn btn-primary"><i class="fa-solid fa-location-arrow"></i> Search</button>
+                        </div>
+
+                        <div class="quick-jump-pills">
+                            <span class="pill-label">Quick Jump:</span>
+                            <button class="pill-btn active" data-lat="18.0124" data-lng="79.5506" data-state="Telangana" data-district="Hanamkonda">Hanamkonda (TS)</button>
+                            <button class="pill-btn" data-lat="16.5062" data-lng="80.6480" data-state="Andhra Pradesh" data-district="Vijayawada">Vijayawada (AP)</button>
+                            <button class="pill-btn" data-lat="30.9010" data-lng="75.8573" data-state="Punjab" data-district="Ludhiana">Ludhiana (PB)</button>
+                            <button class="pill-btn" data-lat="19.9975" data-lng="73.7898" data-state="Maharashtra" data-district="Nashik">Nashik (MH)</button>
+                            <button class="pill-btn" data-lat="22.7196" data-lng="75.8577" data-state="Madhya Pradesh" data-district="Indore">Indore (MP)</button>
+                        </div>
+
+                        <div class="coord-badge" id="map-coords-badge">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <span id="badge-lat">Lat: 18.0124°</span> | <span id="badge-lng">Lng: 79.5506°</span>
+                        </div>
+                    </div>
+
+                    <!-- Map & Info Panel Layout -->
+                    <div class="map-layout">
+                        <div class="panel-card map-card">
+                            <div class="map-card-header">
+                                <h3><i class="fa-solid fa-map-location-dot"></i> Satellite Field View</h3>
+                                <span class="map-layer-tag"><i class="fa-solid fa-layer-group"></i> Esri World Imagery (Satellite) / OpenStreetMap</span>
+                            </div>
+                            <div id="satellite-map-container" class="map-canvas"></div>
+                        </div>
+
+                        <!-- Agricultural Info Panel Card -->
+                        <div class="panel-card map-info-card">
+                            <h3><i class="fa-solid fa-circle-info"></i> Selected Location Analytics</h3>
+
+                            <div class="info-card-header">
+                                <div class="location-title-box">
+                                    <h4 id="map-info-title">Hanamkonda, Telangana</h4>
+                                    <p id="map-info-coords">Lat: 18.0124°, Lng: 79.5506°</p>
+                                </div>
+                                <span id="map-info-status-badge" class="badge badge-good">Good Health</span>
+                            </div>
+
+                            <div class="map-stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Primary Crop</span>
+                                    <span id="map-stat-crop" class="stat-val">Rice</span>
+                                </div>
+
+                                <div class="stat-box">
+                                    <span class="stat-label">Soil Health Score</span>
+                                    <span id="map-stat-soil-score" class="stat-val score-highlight">78.4 / 100</span>
+                                </div>
+
+                                <div class="stat-box">
+                                    <span class="stat-label">Soil Moisture</span>
+                                    <span id="map-stat-moisture" class="stat-val">48.2 %</span>
+                                </div>
+
+                                <div class="stat-box">
+                                    <span class="stat-label">Avg Temperature</span>
+                                    <span id="map-stat-temp" class="stat-val">27.3 °C</span>
+                                </div>
+
+                                <div class="stat-box">
+                                    <span class="stat-label">Annual Rainfall</span>
+                                    <span id="map-stat-rainfall" class="stat-val">945 mm</span>
+                                </div>
+
+                                <div class="stat-box">
+                                    <span class="stat-label">Predicted Yield</span>
+                                    <span id="map-stat-yield" class="stat-val yield-highlight">4.82 t/ha</span>
+                                </div>
+                            </div>
+
+                            <div class="action-box">
+                                <button id="btn-analyze-map-location" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-microchip"></i> Analyze This Location
+                                </button>
+                                <p class="action-subtext">Clicking connects this location with Soil Health, Weather, Yield Prediction, and Crop Recommendation features.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 1C: CROP HEALTH & DISEASE DETECTION -->
+                <section id="tab-crop-health" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-leaf"></i> Crop Health & Disease Computer Vision Analyzer</h2>
+                        <p>Upload a photograph of your crop leaf to inspect visible disease symptoms, pest damage, chlorosis, and health status.</p>
+                    </div>
+
+                    <!-- Combined Agronomic & Location Context Card -->
+                    <div class="context-banner">
+                        <div class="context-item">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <div>
+                                <span class="ctx-label">Location</span>
+                                <strong id="ch-ctx-location">Hanamkonda, Telangana</strong>
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <i class="fa-solid fa-seedling"></i>
+                            <div>
+                                <span class="ctx-label">Selected Crop</span>
+                                <strong id="ch-ctx-crop">Rice</strong>
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <i class="fa-solid fa-flask-vial"></i>
+                            <div>
+                                <span class="ctx-label">Soil Health</span>
+                                <strong id="ch-ctx-soil">78.4 / 100</strong>
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <i class="fa-solid fa-temperature-half"></i>
+                            <div>
+                                <span class="ctx-label">Weather</span>
+                                <strong id="ch-ctx-temp">27.3°C • 945mm</strong>
+                            </div>
+                        </div>
+                        <div class="context-item">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <div>
+                                <span class="ctx-label">Predicted Yield</span>
+                                <strong id="ch-ctx-yield">4.82 t/ha</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-layout">
+                        <!-- Upload & Control Form Panel -->
+                        <div class="panel-card form-panel">
+                            <h3><i class="fa-solid fa-cloud-arrow-up"></i> Upload Crop Photograph</h3>
+
+                            <div class="form-group">
+                                <label>Target Crop Type</label>
+                                <select id="ch-crop-select" class="form-select">
+                                    <option value="Auto Detect Crop" selected>Auto Detect Crop</option>
+                                    <option value="Rice">Rice</option>
+                                    <option value="Maize">Maize</option>
+                                    <option value="Cotton">Cotton</option>
+                                    <option value="Tomato">Tomato</option>
+                                    <option value="Chilli">Chilli</option>
+                                    <option value="Groundnut">Groundnut</option>
+                                    <option value="Wheat">Wheat</option>
+                                    <option value="Soybean">Soybean</option>
+                                    <option value="Sugarcane">Sugarcane</option>
+                                    <option value="Pulses">Pulses</option>
+                                </select>
+                            </div>
+
+                            <!-- Drag & Drop Upload Zone -->
+                            <div class="upload-dropzone" id="crop-upload-dropzone">
+                                <input type="file" id="crop-file-input" accept="image/jpeg,image/jpg,image/png" hidden>
+                                <div class="dropzone-content" id="dropzone-prompt">
+                                    <i class="fa-solid fa-camera-retro dropzone-icon"></i>
+                                    <p class="dropzone-text">Drag & drop your crop leaf image here, or <span>Browse File</span></p>
+                                    <span class="dropzone-sub">Supports JPG, JPEG, PNG (High resolution natural daylight photos recommended)</span>
+                                </div>
+                                <div class="image-preview-container hidden" id="crop-preview-container">
+                                    <img id="crop-preview-img" src="" alt="Crop Preview">
+                                    <button type="button" id="btn-remove-image" class="btn-remove-img" title="Remove Image"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </div>
+
+                            <button type="button" id="btn-analyze-crop" class="btn btn-success btn-block" disabled>
+                                <i class="fa-solid fa-microchip"></i> Analyze Crop Health
+                            </button>
+                        </div>
+
+                        <!-- Results Output Panel -->
+                        <div class="panel-card crop-health-results-panel">
+                            <h3><i class="fa-solid fa-square-poll-vertical"></i> Computer Vision Diagnostic Outcome</h3>
+
+                            <!-- Quality Warning Box -->
+                            <div id="crop-health-quality-warning" class="alert-warning-box hidden">
+                                <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+                                <div>
+                                    <h4 id="warning-title">Image Quality Check Notice</h4>
+                                    <p id="warning-desc">Please upload a clear photograph showing the affected crop or leaf.</p>
+                                </div>
+                            </div>
+
+                            <!-- Result Content Box -->
+                            <div id="crop-health-result-box" class="result-content-wrapper">
+                                <div class="health-status-header">
+                                    <div class="status-title-box">
+                                        <span class="status-label">Detected Status</span>
+                                        <h4 id="ch-result-status" class="status-headline">Ready for Analysis</h4>
+                                        <span id="ch-result-issue" class="status-issue-sub">Upload an image to inspect leaf health</span>
+                                    </div>
+                                    <span id="ch-result-badge" class="badge badge-info">Awaiting Image</span>
+                                </div>
+
+                                <div class="confidence-box margin-v">
+                                    <div class="confidence-header">
+                                        <span>Model Diagnostic Confidence</span>
+                                        <span id="ch-result-confidence" class="confidence-pct">-- %</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div id="bar-crop-health-conf" class="progress-fill fill-blue" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="observation-box">
+                                    <h4><i class="fa-solid fa-eye"></i> Visual Observation</h4>
+                                    <p id="ch-result-observation">Observation details will be generated here upon completing image computer vision analysis.</p>
+                                </div>
+
+                                <div class="symptoms-section">
+                                    <h4><i class="fa-solid fa-list-ul"></i> Common Symptoms Identified</h4>
+                                    <ul id="ch-result-symptoms" class="symptoms-list">
+                                        <li>No symptoms recorded yet.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="next-steps-section">
+                                    <h4><i class="fa-solid fa-shield-halved"></i> Recommended Agricultural Next Steps</h4>
+                                    <ul id="ch-result-recommendations" class="recommendation-list">
+                                        <li>Upload a clear photo to receive field stewardship advice.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: SOIL HEALTH ANALYSIS -->
+                <section id="tab-soil-health" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-flask-vial"></i> Dynamic Soil Health Analysis</h2>
+                        <p>Adjust soil test parameters to dynamically compute the Soil Health Score (0–100), condition status, and agronomic advice.</p>
+                    </div>
+
+                    <div class="panel-layout">
+                        <!-- Soil Inputs Form -->
+                        <div class="panel-card form-panel">
+                            <h3><i class="fa-solid fa-sliders"></i> Soil Parameters</h3>
+                            <form id="soil-form" class="soil-input-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Soil pH <span id="val-ph">6.5</span></label>
+                                        <input type="range" id="input-ph" min="3.5" max="9.5" step="0.1" value="6.5">
+                                        <div class="range-labels"><span>3.5 Acidic</span><span>7.0 Neutral</span><span>9.5 Alkaline</span></div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nitrogen (N) (kg/ha) <span id="val-n">280</span></label>
+                                        <input type="range" id="input-n" min="50" max="600" step="5" value="280">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Phosphorus (P) (kg/ha) <span id="val-p">35</span></label>
+                                        <input type="range" id="input-p" min="5" max="120" step="2" value="35">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Potassium (K) (kg/ha) <span id="val-k">200</span></label>
+                                        <input type="range" id="input-k" min="30" max="600" step="5" value="200">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Organic Carbon (%) <span id="val-oc">0.85</span></label>
+                                        <input type="range" id="input-oc" min="0.1" max="2.5" step="0.05" value="0.85">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Soil Moisture (%) <span id="val-moisture">45</span></label>
+                                        <input type="range" id="input-moisture" min="5" max="90" step="1" value="45">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Soil Temperature (°C) <span id="val-soil-temp">25</span></label>
+                                    <input type="range" id="input-soil-temp" min="10" max="45" step="1" value="25">
+                                </div>
+
+                                <button type="button" id="btn-calc-soil" class="btn btn-primary">
+                                    <i class="fa-solid fa-calculator"></i> Calculate Soil Health Score
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Soil Results Display Panel -->
+                        <div class="panel-card results-panel">
+                            <h3><i class="fa-solid fa-square-poll-vertical"></i> Analysis Results</h3>
+                            
+                            <div class="score-display-box">
+                                <div class="gauge-circle" id="score-gauge-ring">
+                                    <div class="inner-gauge">
+                                        <span id="res-soil-score" class="gauge-score">78</span>
+                                        <span class="gauge-max">/ 100</span>
+                                    </div>
+                                </div>
+                                <div class="condition-badge-box">
+                                    <span class="condition-label">Soil Condition</span>
+                                    <span id="res-soil-condition" class="badge badge-good">Good</span>
+                                </div>
+                            </div>
+
+                            <div class="nutrient-meters">
+                                <h4>Nutrient Status Breakdown</h4>
+                                <div class="meter-item">
+                                    <div class="meter-label"><span>pH Index</span><span id="status-ph">Optimal (6.5)</span></div>
+                                    <div class="progress-bar"><div id="bar-ph" class="progress-fill fill-green" style="width: 85%;"></div></div>
+                                </div>
+                                <div class="meter-item">
+                                    <div class="meter-label"><span>Nitrogen (N)</span><span id="status-n">Optimal (280 kg/ha)</span></div>
+                                    <div class="progress-bar"><div id="bar-n" class="progress-fill fill-green" style="width: 75%;"></div></div>
+                                </div>
+                                <div class="meter-item">
+                                    <div class="meter-label"><span>Phosphorus (P)</span><span id="status-p">Optimal (35 kg/ha)</span></div>
+                                    <div class="progress-bar"><div id="bar-p" class="progress-fill fill-green" style="width: 70%;"></div></div>
+                                </div>
+                                <div class="meter-item">
+                                    <div class="meter-label"><span>Potassium (K)</span><span id="status-k">Optimal (200 kg/ha)</span></div>
+                                    <div class="progress-bar"><div id="bar-k" class="progress-fill fill-green" style="width: 72%;"></div></div>
+                                </div>
+                            </div>
+
+                            <div class="recommendations-box">
+                                <h4><i class="fa-solid fa-list-check"></i> Dynamic Soil Recommendations</h4>
+                                <ul id="soil-recommendations-list" class="recommendation-list">
+                                    <li>Soil parameters are well-balanced. Maintain organic matter recycling.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: WEATHER ANALYTICS -->
+                <section id="tab-weather" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-cloud-sun-rain"></i> Regional Weather Analytics</h2>
+                        <p>Real-time and historical weather observations linked to regional crop performance.</p>
+                    </div>
+
+                    <div class="weather-grid">
+                        <div class="weather-card">
+                            <div class="weather-icon"><i class="fa-solid fa-temperature-high"></i></div>
+                            <div class="weather-data">
+                                <span class="weather-label">Air Temperature</span>
+                                <span id="weather-temp" class="weather-val">27.3 °C</span>
+                                <span class="weather-sub">Ideal crop growth range</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-card">
+                            <div class="weather-icon"><i class="fa-solid fa-cloud-showers-heavy"></i></div>
+                            <div class="weather-data">
+                                <span class="weather-label">Total Rainfall</span>
+                                <span id="weather-rain" class="weather-val">945 mm</span>
+                                <span class="weather-sub">Annual precipitation</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-card">
+                            <div class="weather-icon"><i class="fa-solid fa-droplet-degree"></i></div>
+                            <div class="weather-data">
+                                <span class="weather-label">Relative Humidity</span>
+                                <span id="weather-humidity" class="weather-val">68 %</span>
+                                <span class="weather-sub">Atmospheric vapor</span>
+                            </div>
+                        </div>
+
+                        <div class="weather-card">
+                            <div class="weather-icon"><i class="fa-solid fa-wind"></i></div>
+                            <div class="weather-data">
+                                <span class="weather-label">Wind Speed</span>
+                                <span id="weather-wind" class="weather-val">12.4 km/h</span>
+                                <span class="weather-sub">Moderate breeze</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-card weather-chart-panel">
+                        <h3><i class="fa-solid fa-chart-area"></i> Weather vs Crop Productivity Correlations</h3>
+                        <p class="chart-desc">Interactive view showing how rainfall and temperature variations impact overall crop yield.</p>
+                        <div class="chart-container large-chart">
+                            <canvas id="chart-weather-correlation"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: CROP YIELD PREDICTION -->
+                <section id="tab-crop-prediction" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-wheat-awn"></i> Machine Learning Crop Yield Prediction</h2>
+                        <p>Input field soil and climate parameters to generate high-precision yield forecasts using our Random Forest Regression model.</p>
+                    </div>
+
+                    <div class="panel-layout">
+                        <!-- Prediction Form -->
+                        <div class="panel-card form-panel">
+                            <h3><i class="fa-solid fa-pen-to-square"></i> Input Field Parameters</h3>
+                            <form id="yield-predict-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Target Crop</label>
+                                        <select id="pred-crop" class="form-select">
+                                            <option value="Rice" selected>Rice</option>
+                                            <option value="Wheat">Wheat</option>
+                                            <option value="Maize">Maize</option>
+                                            <option value="Cotton">Cotton</option>
+                                            <option value="Groundnut">Groundnut</option>
+                                            <option value="Soybean">Soybean</option>
+                                            <option value="Sugarcane">Sugarcane</option>
+                                            <option value="Tomato">Tomato</option>
+                                            <option value="Chilli">Chilli</option>
+                                            <option value="Pulses">Pulses</option>
+                                            <option value="Mustard">Mustard</option>
+                                            <option value="Potato">Potato</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Cultivated Area (Hectares)</label>
+                                        <input type="number" id="pred-area" class="form-input" value="2.5" min="0.1" step="0.1">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Soil pH</label>
+                                        <input type="number" id="pred-ph" class="form-input" value="6.5" min="3.5" max="9.5" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nitrogen (N) (kg/ha)</label>
+                                        <input type="number" id="pred-n" class="form-input" value="280" min="20" max="600">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Phosphorus (P) (kg/ha)</label>
+                                        <input type="number" id="pred-p" class="form-input" value="35" min="5" max="150">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Potassium (K) (kg/ha)</label>
+                                        <input type="number" id="pred-k" class="form-input" value="200" min="20" max="600">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Annual Rainfall (mm)</label>
+                                        <input type="number" id="pred-rainfall" class="form-input" value="950" min="100" max="3000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Temperature (°C)</label>
+                                        <input type="number" id="pred-temp" class="form-input" value="26.5" min="5" max="50" step="0.5">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Humidity (%)</label>
+                                        <input type="number" id="pred-humidity" class="form-input" value="68" min="10" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Soil Moisture (%)</label>
+                                        <input type="number" id="pred-moisture" class="form-input" value="45" min="5" max="95">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-success btn-block">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Predict Expected Crop Yield
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Prediction Output Box -->
+                        <div class="panel-card prediction-results-panel">
+                            <h3><i class="fa-solid fa-chart-line"></i> Yield Forecast Outcome</h3>
+
+                            <div class="yield-primary-output">
+                                <div class="yield-unit-box">
+                                    <span class="unit-title">Yield Rate</span>
+                                    <span id="output-yield-tonnes" class="large-yield-val">4.82</span>
+                                    <span class="unit-subtitle">tonnes / hectare</span>
+                                    <span id="output-yield-kg" class="sub-yield-val">(4,820 kg / ha)</span>
+                                </div>
+
+                                <div class="yield-unit-box highlight-box">
+                                    <span class="unit-title">Total Production</span>
+                                    <span id="output-total-production" class="large-yield-val">12.05</span>
+                                    <span class="unit-subtitle">Total Tonnes</span>
+                                    <span id="output-total-kg" class="sub-yield-val">(12,050 kg total)</span>
+                                </div>
+                            </div>
+
+                            <div class="confidence-box">
+                                <div class="confidence-header">
+                                    <span>ML Model Prediction Confidence</span>
+                                    <span id="output-confidence" class="confidence-pct">89.5%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div id="bar-confidence" class="progress-fill fill-blue" style="width: 89.5%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="drivers-box">
+                                <h4>Key Yield Drivers & Factor Assessment</h4>
+                                <div id="yield-drivers-list" class="drivers-list">
+                                    <!-- Dynamic driver list -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5: CROP RECOMMENDATION -->
+                <section id="tab-crop-recommendation" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Smart Crop Recommendation Engine</h2>
+                        <p>Determine the top suitable crops for your land based on soil nutrients and climatic parameters.</p>
+                    </div>
+
+                    <div class="panel-layout">
+                        <!-- Recommendation Input Form -->
+                        <div class="panel-card form-panel">
+                            <h3><i class="fa-solid fa-sliders"></i> Soil & Climate Parameters</h3>
+                            <form id="crop-recommend-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Soil pH</label>
+                                        <input type="number" id="rec-ph" class="form-input" value="6.5" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nitrogen (N) (kg/ha)</label>
+                                        <input type="number" id="rec-n" class="form-input" value="280">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Phosphorus (P) (kg/ha)</label>
+                                        <input type="number" id="rec-p" class="form-input" value="35">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Potassium (K) (kg/ha)</label>
+                                        <input type="number" id="rec-k" class="form-input" value="200">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Temperature (°C)</label>
+                                        <input type="number" id="rec-temp" class="form-input" value="26.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Humidity (%)</label>
+                                        <input type="number" id="rec-humidity" class="form-input" value="70">
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Rainfall (mm)</label>
+                                        <input type="number" id="rec-rainfall" class="form-input" value="950">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Soil Moisture (%)</label>
+                                        <input type="number" id="rec-moisture" class="form-input" value="45">
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-magnifying-glass-chart"></i> Recommend Best Crops
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Recommendations Output Cards -->
+                        <div class="panel-card recommendations-output-panel">
+                            <h3><i class="fa-solid fa-trophy"></i> Recommended Crops Ranking</h3>
+                            <div id="crop-recommendations-container" class="crop-cards-list">
+                                <!-- Dynamic crop cards -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6: AGRICULTURAL DATA TABLE -->
+                <section id="tab-agricultural-data" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-table-list"></i> Agricultural Dataset Explorer</h2>
+                        <p>Search, filter, sort, and export comprehensive regional soil, climate, and crop yield historical records.</p>
+                    </div>
+
+                    <div class="table-controls-bar">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="table-search-input" placeholder="Search by Record ID, State, District, Village, Crop...">
+                        </div>
+
+                        <div class="table-actions">
+                            <select id="table-sort-by" class="form-select">
+                                <option value="Record_ID">Sort by Record ID</option>
+                                <option value="Crop_Yield_tonnes_ha">Sort by Yield (High to Low)</option>
+                                <option value="Soil_pH">Sort by Soil pH</option>
+                                <option value="Nitrogen_N">Sort by Nitrogen</option>
+                                <option value="Rainfall_mm">Sort by Rainfall</option>
+                            </select>
+
+                            <button id="btn-export-csv" class="btn btn-secondary">
+                                <i class="fa-solid fa-file-csv"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div class="table-responsive-wrapper">
+                        <table class="data-table" id="agriculture-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>State</th>
+                                    <th>District</th>
+                                    <th>Village</th>
+                                    <th>Crop</th>
+                                    <th>pH</th>
+                                    <th>N (kg/ha)</th>
+                                    <th>P (kg/ha)</th>
+                                    <th>K (kg/ha)</th>
+                                    <th>Temp (°C)</th>
+                                    <th>Rainfall (mm)</th>
+                                    <th>Moisture (%)</th>
+                                    <th>Yield (t/ha)</th>
+                                    <th>Soil Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Dynamic table rows -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Pagination Controls -->
+                    <div class="table-pagination">
+                        <span id="pagination-info">Showing page 1 of 10</span>
+                        <div class="pagination-buttons">
+                            <button id="btn-prev-page" class="btn btn-outline"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                            <button id="btn-next-page" class="btn btn-outline">Next <i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: SMART AGRICULTURAL RECOMMENDATIONS -->
+                <section id="tab-farmer-recommendations" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-lightbulb"></i> Smart Agricultural Recommendations</h2>
+                        <p>Actionable field management strategies derived dynamically from current soil and climate analysis.</p>
+                    </div>
+
+                    <div class="farmer-recommendations-grid">
+                        <div class="smart-rec-card">
+                            <div class="rec-icon icon-water"><i class="fa-solid fa-droplet"></i></div>
+                            <div class="rec-content">
+                                <h4 id="rec-title-irrigation">Irrigation Strategy</h4>
+                                <p id="rec-desc-irrigation">Moisture levels are optimal. Standard irrigation schedule is sufficient.</p>
+                                <span class="rec-tag tag-info">Hydration Advisory</span>
+                            </div>
+                        </div>
+
+                        <div class="smart-rec-card">
+                            <div class="rec-icon icon-fertilizer"><i class="fa-solid fa-vial"></i></div>
+                            <div class="rec-content">
+                                <h4 id="rec-title-fertilizer">Fertilizer & Soil Nutrition</h4>
+                                <p id="rec-desc-fertilizer">Nitrogen and Phosphorus levels are adequate. Maintain standard organic amendment practices.</p>
+                                <span class="rec-tag tag-success">Nutrition Plan</span>
+                            </div>
+                        </div>
+
+                        <div class="smart-rec-card">
+                            <div class="rec-icon icon-drainage"><i class="fa-solid fa-cloud-showers-water"></i></div>
+                            <div class="rec-content">
+                                <h4 id="rec-title-drainage">Waterlogging & Drainage</h4>
+                                <p id="rec-desc-drainage">Precipitation levels are normal. Drainage channels are clear.</p>
+                                <span class="rec-tag tag-warning">Risk Protection</span>
+                            </div>
+                        </div>
+
+                        <div class="smart-rec-card">
+                            <div class="rec-icon icon-soil"><i class="fa-solid fa-layer-group"></i></div>
+                            <div class="rec-content">
+                                <h4 id="rec-title-soil">Soil Health Maintenance</h4>
+                                <p id="rec-desc-soil">Soil condition is Good. Continue cover cropping and minimal tillage.</p>
+                                <span class="rec-tag tag-primary">Long-term Stewardship</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: REPORTS & EXPORT -->
+                <section id="tab-reports" class="tab-pane">
+                    <div class="section-title-box">
+                        <h2><i class="fa-solid fa-file-pdf"></i> Agricultural Executive Report</h2>
+                        <p>Generate, preview, and download comprehensive PDF reports containing full soil, weather, yield, and crop recommendation insights.</p>
+                    </div>
+
+                    <div class="report-actions-bar">
+                        <button id="btn-generate-report-pdf" class="btn btn-danger">
+                            <i class="fa-solid fa-file-pdf"></i> Download PDF Report
+                        </button>
+                        <button id="btn-print-report" class="btn btn-secondary">
+                            <i class="fa-solid fa-print"></i> Print Report
+                        </button>
+                    </div>
+
+                    <!-- Report Document Preview Box -->
+                    <div class="report-paper" id="report-document-area">
+                        <div class="report-header">
+                            <div class="report-brand">
+                                <i class="fa-solid fa-seedling"></i>
+                                <div>
+                                    <h2>AgriSense Analytics Report</h2>
+                                    <p>Precision Agriculture – Crop Yield & Soil Health Analytics Platform</p>
+                                </div>
+                            </div>
+                            <div class="report-meta">
+                                <p><strong>Date:</strong> <span id="report-date">2026-08-14</span></p>
+                                <p><strong>Report ID:</strong> <span id="report-id">REP-94821</span></p>
+                            </div>
+                        </div>
+
+                        <hr class="report-divider">
+
+                        <!-- Report Body -->
+                        <div class="report-section">
+                            <h3>1. Selected Location & Crop Profile</h3>
+                            <table class="report-table">
+                                <tr>
+                                    <td><strong>State:</strong> <span id="rep-state">Telangana</span></td>
+                                    <td><strong>District:</strong> <span id="rep-district">Hanamkonda</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Village / Local Area:</strong> <span id="rep-village">All Villages</span></td>
+                                    <td><strong>Selected Crop:</strong> <span id="rep-crop">Rice</span></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <div class="report-section">
+                            <h3>2. Soil Health Assessment</h3>
+                            <div class="report-box-grid">
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Soil Health Score</span>
+                                    <span id="rep-soil-score" class="kpi-val">78.4 / 100</span>
+                                </div>
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Soil Condition</span>
+                                    <span id="rep-soil-condition" class="kpi-val">Good</span>
+                                </div>
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Soil pH</span>
+                                    <span id="rep-soil-ph" class="kpi-val">6.5 (Optimal)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-section">
+                            <h3>3. Weather Conditions</h3>
+                            <div class="report-box-grid">
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Avg Temperature</span>
+                                    <span id="rep-temp" class="kpi-val">27.3 °C</span>
+                                </div>
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Annual Rainfall</span>
+                                    <span id="rep-rain" class="kpi-val">945 mm</span>
+                                </div>
+                                <div class="report-kpi">
+                                    <span class="kpi-label">Soil Moisture</span>
+                                    <span id="rep-moisture" class="kpi-val">48.2 %</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-section">
+                            <h3>4. Machine Learning Crop Yield Forecast</h3>
+                            <div class="report-highlight-box">
+                                <p><strong>Predicted Yield Rate:</strong> <span id="rep-pred-yield">4.82 tonnes/hectare</span> (4,820 kg/ha)</p>
+                                <p><strong>Model Confidence Score:</strong> <span id="rep-confidence">89.5%</span></p>
+                            </div>
+                        </div>
+
+                        <div class="report-section">
+                            <h3>5. Recommended Crops & Farmer Advice</h3>
+                            <div id="rep-recommendations-list" class="report-list">
+                                <ul>
+                                    <li>Top Suitable Crop: <strong>Rice</strong> (92.5% Suitability Match)</li>
+                                    <li>Apply nitrogen supplementation to maintain optimal canopy growth.</li>
+                                    <li>Ensure regular moisture monitoring during flowering phase.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="report-footer">
+                            <p>Generated by AgriSense Precision Agriculture Analytics Platform • Confidential Agronomic Insights</p>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript App Execution -->
+    <script src="script.js"></script>
+</body>
+</html>
