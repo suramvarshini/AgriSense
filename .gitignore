@@ -1,0 +1,27 @@
+# Python Virtual Environment
+venv/
+.venv/
+env/
+
+# Python bytecode cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+
+# Environment variables
+.env
+*.env
+
+# IDE & OS files
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+# Node / Netlify CLI
+node_modules/
+.netlify/
+
+# Logs
+*.log
